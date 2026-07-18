@@ -31,6 +31,16 @@ const orderItemSchema = new mongoose.Schema(
 
 const orderSchema = new mongoose.Schema(
   {
+    orderId: {
+      type: String,
+      unique: true,
+      sparse: true
+    },
+    vegTag: {
+      type: String,
+      enum: ['V', 'NV', ''],
+      default: ''
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

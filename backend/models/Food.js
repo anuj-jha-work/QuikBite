@@ -25,6 +25,10 @@ const foodSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Food price is required'],
       min: [0, 'Price must be positive']
+    },
+    vegetarian: {
+      type: Boolean,
+      default: false
     }
   },
   { timestamps: true }

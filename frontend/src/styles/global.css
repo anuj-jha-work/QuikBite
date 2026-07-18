@@ -573,6 +573,10 @@ main {
   font-size: 0.92rem;
 }
 
+.form-field[name="state"] {
+  min-width: 200px;
+}
+
 .form-message--error {
   color: #b84b37;
   background: #fff2ee;
@@ -678,6 +682,16 @@ main {
 
 .site-footer {
   background: #161616;
+  color: #f7f7f7;
+}
+
+.site-footer h3 {
+  color: #ffffff;
+}
+
+.site-footer p,
+.site-footer li {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .dashboard-section h2 {

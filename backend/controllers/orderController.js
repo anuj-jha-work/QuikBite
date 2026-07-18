@@ -5,6 +5,20 @@ const User = require('../models/User');
 const allowedStatuses = ['Processing', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'];
 const deliveryFee = 2.99;
 
+const generateOrderId = async () => {
+  const lastOrder = await Order.findOne({}, { orderId: 1 }).sort({ createdAt: -1 });
+  let nextNumber = 101;
+  
+  if (lastOrder && lastOrder.orderId) {
+    const lastNumber = parseInt(lastOrder.orderId.replace(/[^\d]/g, ''));
+    if (!isNaN(lastNumber)) {
+      nextNumber = lastNumber + 1;
+    }
+  }
+  
+  return nextNumber.toString();
+};
+
 const buildOrderItems = async (itemsInput, cartData) => {
   const sourceItems = Array.isArray(itemsInput) && itemsInput.length > 0
     ? itemsInput
@@ -36,10 +50,29 @@ const buildOrderItems = async (itemsInput, cartData) => {
     };
   });
 
+  // Determine vegetarian tag
+  const allVegetarian = orderItems.every((item) => {
+    const food = foodMap.get((item.foodId || '').toString());
+    return food && food.vegetarian;
+  });
+
+  const anyVegetarian = orderItems.some((item) => {
+    const food = foodMap.get((item.foodId || '').toString());
+    return food && food.vegetarian;
+  });
+
+  let vegTag = '';
+  if (allVegetarian) {
+    vegTag = 'V';
+  } else if (!anyVegetarian) {
+    vegTag = 'NV';
+  }
+
   const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   return {
     orderItems,
-    amount: Number((subtotal + deliveryFee).toFixed(2))
+    amount: Number((subtotal + deliveryFee).toFixed(2)),
+    vegTag
   };
 };
 
@@ -61,9 +94,12 @@ const placeOrder = async (req, res) => {
     const { address, payment, items } = req.body;
     validateAddress(address);
 
-    const { orderItems, amount } = await buildOrderItems(items, Object.fromEntries(user.cartData || new Map()));
+    const { orderItems, amount, vegTag } = await buildOrderItems(items, Object.fromEntries(user.cartData || new Map()));
+    const orderId = await generateOrderId();
 
     const order = await Order.create({
+      orderId,
+      vegTag,
       userId: user._id,
       items: orderItems,
       amount,
