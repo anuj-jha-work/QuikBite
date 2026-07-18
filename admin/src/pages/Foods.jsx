@@ -93,7 +93,14 @@ const Foods = () => {
           </div>
           {foods.map((food) => (
             <div className="admin-table__row admin-table__row--food" key={food._id}>
-              <img src={resolveImageUrl(food.image)} alt={food.name} className="admin-food-thumb" />
+              <img 
+                src={resolveImageUrl(food.image)} 
+                alt={food.name} 
+                className="admin-food-thumb" 
+                onError={(event) => {
+                  event.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+                }}
+              />
               <span>{food.name}</span>
               <span>{food.category}</span>
               <span>{formatCurrency(food.price)}</span>

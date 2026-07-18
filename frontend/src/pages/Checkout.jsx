@@ -13,6 +13,16 @@ const initialForm = {
   pinCode: ''
 };
 
+const fieldLabels = {
+  name: 'Full Name',
+  phone: 'Phone Number',
+  email: 'Email Address',
+  address: 'Street Address',
+  city: 'City',
+  state: 'State',
+  pinCode: 'PIN Code'
+};
+
 const Checkout = () => {
   const { user, getCartItems, getCartTotals, placeOrder } = useContext(StoreContext);
   const [form, setForm] = useState(initialForm);
@@ -47,13 +57,13 @@ const Checkout = () => {
           <div className="section-heading">
             <div>
               <span className="eyebrow">Checkout</span>
-              <h1>Delivery details</h1>
+              <h1>Delivery Details</h1>
             </div>
           </div>
           <form className="form-grid" onSubmit={handleSubmit}>
             {Object.entries(initialForm).map(([field]) => (
               <label className="form-field" key={field}>
-                <span>{field.replace(/([A-Z])/g, ' $1')}</span>
+                <span>{fieldLabels[field] || field.replace(/([A-Z])/g, ' $1')}</span>
                 <input
                   className="input"
                   name={field}
@@ -83,11 +93,11 @@ const Checkout = () => {
             <strong>{formatCurrency(totals.subtotal)}</strong>
           </div>
           <div className="summary-row">
-            <span>Delivery fee</span>
+            <span>Delivery Fee</span>
             <strong>{formatCurrency(totals.deliveryFee)}</strong>
           </div>
           <div className="summary-row summary-row--total">
-            <span>Grand total</span>
+            <span>Grand Total</span>
             <strong>{formatCurrency(totals.grandTotal)}</strong>
           </div>
         </aside>

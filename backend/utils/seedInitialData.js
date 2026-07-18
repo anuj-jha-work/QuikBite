@@ -103,7 +103,7 @@ const sampleFoods = [
     name: 'Masala Dosa',
     description: 'Crispy South Indian crepe served with potato filling and chutneys.',
     category: 'Indian',
-    image: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5979?auto=format&fit=crop&w=900&q=80',
+    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=900&q=80',
     price: 9.49,
     vegetarian: true
   },
@@ -143,13 +143,27 @@ const sampleFoods = [
     name: 'Gulab Jamun',
     description: 'Soft milk-solid dumplings soaked in rose-scented syrup.',
     category: 'Dessert',
-    image: 'https://images.unsplash.com/photo-1585518419759-112b5b82934d?auto=format&fit=crop&w=900&q=80',
+    image: 'https://images.unsplash.com/photo-1548679030-fa82015a443b?auto=format&fit=crop&w=900&q=80',
     price: 4.99,
     vegetarian: true
   }
 ];
 
 const seedInitialData = async () => {
+  try {
+    await Food.updateMany(
+      { name: 'Masala Dosa', image: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5979?auto=format&fit=crop&w=900&q=80' },
+      { image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=900&q=80' }
+    );
+    await Food.updateMany(
+      { name: 'Gulab Jamun', image: 'https://images.unsplash.com/photo-1585518419759-112b5b82934d?auto=format&fit=crop&w=900&q=80' },
+      { image: 'https://images.unsplash.com/photo-1548679030-fa82015a443b?auto=format&fit=crop&w=900&q=80' }
+    );
+    console.log('Updated broken sample food image URLs in database');
+  } catch (updateError) {
+    console.error('Failed to run image migration:', updateError.message);
+  }
+
   const existingFoods = await Food.find({}, { name: 1 });
   const existingNames = new Set(existingFoods.map((food) => food.name));
   const foodsToInsert = sampleFoods.filter((food) => !existingNames.has(food.name));

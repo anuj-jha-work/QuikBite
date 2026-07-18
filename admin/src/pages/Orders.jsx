@@ -47,7 +47,7 @@ const Orders = () => {
         </div>
         {orders.map((order) => (
           <div className="admin-table__row admin-table__row--orders" key={order._id}>
-            <span>{order._id.slice(-8)}</span>
+            <span>{order.orderId ? `QB-${order.orderId}` : `QB-${order._id.slice(-6).toUpperCase()}`}</span>
             <span>{order.userId?.name || order.address?.name || 'Unknown'}</span>
             <span>{formatCurrency(order.amount)}</span>
             <span>{order.status}</span>

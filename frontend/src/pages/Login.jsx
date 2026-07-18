@@ -39,8 +39,8 @@ const Login = () => {
     <section className="section auth-shell">
       <div className="container auth-card">
         <div>
-          <span className="eyebrow">Welcome back</span>
-          <h1>Log in to manage your cart and orders.</h1>
+          <span className="eyebrow">Welcome Back</span>
+          <h1>Log In to Manage Your Cart and Orders.</h1>
           <p>Use the same account for customer ordering and order tracking.</p>
         </div>
         <form className="form-grid" onSubmit={handleSubmit}>
@@ -53,11 +53,11 @@ const Login = () => {
             <input className="input" type="password" name="password" value={form.password} onChange={handleChange} required />
           </label>
           <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-            {submitting ? 'Signing in...' : 'Login'}
+            {submitting ? 'Signing In...' : 'Login'}
           </button>
           {error ? <div className="form-message form-message--error">{error}</div> : null}
           <p className="auth-link">
-            New here? <Link to="/register">Create an account</Link>
+            New here? <Link to="/register">Create an Account</Link>
           </p>
         </form>
       </div>

@@ -23,7 +23,7 @@ const Orders = () => {
       <div className="order-card__top">
         <div>
           <span className="eyebrow">Order</span>
-          <h3>{order._id}</h3>
+          <h3>{order.orderId ? `QB-${order.orderId}` : `QB-${order._id.slice(-6).toUpperCase()}`}</h3>
         </div>
         <span className={`status-pill status-pill--${order.status.toLowerCase().replace(/\s+/g, '-')}`}>{order.status}</span>
       </div>
@@ -49,8 +49,8 @@ const Orders = () => {
       <div className="container">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">User dashboard</span>
-            <h1>Your orders</h1>
+            <span className="eyebrow">User Dashboard</span>
+            <h1>Your Orders</h1>
           </div>
         </div>
 

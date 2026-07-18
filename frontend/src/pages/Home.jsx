@@ -14,7 +14,7 @@ const Home = () => {
       <section className="hero">
         <div className="container hero-grid">
           <div className="hero-copy">
-            <span className="eyebrow">Fast delivery made fresh</span>
+            <span className="eyebrow">Fast Delivery Made Fresh</span>
             <h1>Order crave-worthy meals without slowing down your day.</h1>
             <p>
               QuikBite connects you to hot, fresh, and well-crafted dishes with search, filters, smart cart totals,
@@ -45,12 +45,12 @@ const Home = () => {
           </div>
           <div className="hero-visual">
             <div className="hero-panel hero-panel--big">
-              <span>Today's favorite</span>
+              <span>Today's Favorite</span>
               <h2>BBQ Chicken Pizza</h2>
               <p>Smoke, spice, and melty cheese in a single order.</p>
             </div>
             <div className="hero-panel hero-panel--small">
-              <span>Quick reorder</span>
+              <span>Quick Reorder</span>
               <h3>One tap from cart to checkout</h3>
             </div>
           </div>
@@ -61,11 +61,11 @@ const Home = () => {
         <div className="container">
           <div className="section-heading">
             <div>
-              <span className="eyebrow">Browse categories</span>
-              <h2>Popular food types</h2>
+              <span className="eyebrow">Browse Categories</span>
+              <h2>Popular Food Types</h2>
             </div>
             <Link to="/menu" className="text-link">
-              See full menu
+              See Full Menu
             </Link>
           </div>
           <div className="category-grid">
@@ -82,8 +82,8 @@ const Home = () => {
         <div className="container">
           <div className="section-heading">
             <div>
-              <span className="eyebrow">Popular dishes</span>
-              <h2>Top picks customers order most</h2>
+              <span className="eyebrow">Popular Dishes</span>
+              <h2>Top Picks Customers Order Most</h2>
             </div>
           </div>
           <div className="food-grid">
@@ -106,15 +106,15 @@ const Home = () => {
           </div>
           <div className="about-cards">
             <article className="info-card">
-              <h3>Smart search</h3>
+              <h3>Smart Search</h3>
               <p>Find any dish fast by typing the name directly into the menu search.</p>
             </article>
             <article className="info-card">
-              <h3>Live cart totals</h3>
+              <h3>Live Cart Totals</h3>
               <p>Keep track of subtotal, delivery fee, and final payment before checkout.</p>
             </article>
             <article className="info-card">
-              <h3>Order tracking</h3>
+              <h3>Order Tracking</h3>
               <p>See processing, preparation, delivery, and cancellation states in your dashboard.</p>
             </article>
           </div>

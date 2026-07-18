@@ -38,8 +38,8 @@ const Register = () => {
     <section className="section auth-shell">
       <div className="container auth-card">
         <div>
-          <span className="eyebrow">Create your account</span>
-          <h1>Register to start ordering fast.</h1>
+          <span className="eyebrow">Create Your Account</span>
+          <h1>Register to Start Ordering Fast.</h1>
           <p>One account unlocks the cart, checkout, and your personal order dashboard.</p>
         </div>
         <form className="form-grid" onSubmit={handleSubmit}>
@@ -60,11 +60,11 @@ const Register = () => {
             <input className="input" type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} required minLength="8" />
           </label>
           <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-            {submitting ? 'Creating account...' : 'Register'}
+            {submitting ? 'Creating Account...' : 'Register'}
           </button>
           {message ? <div className="form-message form-message--error">{message}</div> : null}
           <p className="auth-link">
-            Already have an account? <Link to="/login">Login here</Link>
+            Already have an account? <Link to="/login">Login Here</Link>
           </p>
         </form>
       </div>

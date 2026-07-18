@@ -24,11 +24,11 @@ const Cart = () => {
       <div className="container">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">Your cart</span>
+            <span className="eyebrow">Your Cart</span>
             <h1>Review items before checkout.</h1>
           </div>
           <Link to="/menu" className="text-link">
-            Continue shopping
+            Continue Shopping
           </Link>
         </div>
 
@@ -41,7 +41,13 @@ const Cart = () => {
             <div className="cart-list">
               {cartItems.map((item) => (
                 <article className="cart-item" key={item._id}>
-                  <img src={resolveImageUrl(item.image)} alt={item.name} />
+                  <img 
+                    src={resolveImageUrl(item.image)} 
+                    alt={item.name} 
+                    onError={(event) => {
+                      event.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+                    }}
+                  />
                   <div className="cart-item__body">
                     <div>
                       <h3>{item.name}</h3>
@@ -75,11 +81,11 @@ const Cart = () => {
                 <strong>{formatCurrency(totals.subtotal)}</strong>
               </div>
               <div className="summary-row">
-                <span>Delivery fee</span>
+                <span>Delivery Fee</span>
                 <strong>{formatCurrency(totals.deliveryFee)}</strong>
               </div>
               <div className="summary-row summary-row--total">
-                <span>Total</span>
+                <span>Total Amount</span>
                 <strong>{formatCurrency(totals.grandTotal)}</strong>
               </div>
               <button type="button" className="btn btn-primary btn-block" onClick={() => navigate('/checkout')}>
