@@ -111,10 +111,11 @@ const sampleFoods = [
     name: 'Chole Bhature',
     description: 'Fluffy fried bread with spicy chickpea curry and onions.',
     category: 'Indian',
-    image: 'https://images.unsplash.com/photo-1626804475297-41608ea09aeb?auto=format&fit=crop&w=900&q=80',
+    image: 'https://share.google/VJiM68j46UwYVTN0g',
     price: 10.99,
     vegetarian: true
   },
+
   {
     name: 'Vada Pav',
     description: 'Mumbai-style potato fritter burger with garlic chutney and chili.',
@@ -127,10 +128,11 @@ const sampleFoods = [
     name: 'Aloo Paratha',
     description: 'Whole wheat flatbread stuffed with spiced mashed potatoes.',
     category: 'Indian',
-    image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?auto=format&fit=crop&w=900&q=80',
+    image: 'https://share.google/97w24LhDQjzIhCQAs',
     price: 7.49,
     vegetarian: true
   },
+
   {
     name: 'Butter Chicken',
     description: 'Creamy tomato-based curry with tender chicken pieces.',
