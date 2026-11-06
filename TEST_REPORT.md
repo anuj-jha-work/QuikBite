@@ -1,34 +1,40 @@
 # QuikBite Test Report
 
-## Scope
-
-The report covers the Go API and both React/Vite production builds. Customer and
-admin applications use the documented API routes, token authentication,
-multipart fields, and response keys.
-
-## Executed checks
+## Automated checks completed
 
 | Check | Result |
 | --- | --- |
-| `gofmt` on Go source | Passed |
+| Go formatting | Passed |
 | `go test ./...` | Passed |
 | `go vet ./...` | Passed |
-| Production configuration validation tests | Passed |
-| Go production build (`go build ./cmd/api`) | Passed |
-| Customer frontend `npm run build` | Passed |
-| Admin frontend `npm run build` | Passed |
-| Health endpoint handler test | Passed |
-| Unknown route 404 contract test | Passed |
-| Protected route without token test | Passed |
-| Address validation and currency rounding test | Passed |
-| Live MongoDB Atlas login/order/upload test | Not run: credentials unavailable |
-| Browser verification of customer/admin apps | Not run: requires deployed services |
-| `npm audit fix` | Applied in both frontends; remaining findings require breaking upgrades |
+| `go build ./cmd/api` | Passed |
+| Customer `npm run build` | Passed |
+| Admin `npm run build` | Passed |
+| Configuration validation tests | Passed |
+| Health endpoint test | Passed |
+| Unknown-route test | Passed |
+| Protected-route-without-token test | Passed |
+| Address validation and currency rounding tests | Passed |
 
-## Manual verification
+## Checks requiring live services
 
-Set a valid `MONGO_URL` and strong `JWT_SECRET`, start the Go service, and run
-both Vite applications with `VITE_API_URL=http://localhost:5000`. Verify an
-existing user login, food listing, cart mutation, checkout, admin status change,
-and image upload against the existing Atlas database. Do not run destructive
-database commands during verification.
+These require valid credentials and deployed services:
+
+- MongoDB Atlas login and order flow
+- Customer browser smoke test
+- Admin browser smoke test
+- Cloudinary image upload
+- Final production CORS verification
+
+## Manual smoke-test checklist
+
+1. Open `/healthz` and confirm the API returns `status: ok`.
+2. Register a customer and log in.
+3. Load the food list.
+4. Add food to the cart and update quantity.
+5. Place an order and verify order history.
+6. Log in to the admin application.
+7. Add food with an image.
+8. Change an order status.
+
+Do not use destructive database commands during verification.

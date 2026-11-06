@@ -1,86 +1,184 @@
-# Go Learning Guide for QuikBite
+# Go Learning and Interview Guide
 
-This guide explains the implementation in `backend/` using the actual QuikBite
-code.
+This guide explains the Go code in QuikBite in simple, interview-ready terms.
 
 ## Project map
 
-- `cmd/api/main.go` is the composition root: it loads configuration, opens
-  MongoDB, creates the repository and HTTP server, and performs graceful shutdown.
-- `internal/config` contains environment configuration and validation.
-- `internal/models` contains BSON/JSON structs. Struct tags preserve the
-  existing MongoDB names and frontend JSON shape.
-- `internal/repository` contains MongoDB operations. Keeping database calls here
-  prevents HTTP handlers from knowing MongoDB query details.
-- `internal/httpapi` contains routing, middleware, validation, handlers, and
-  response shaping.
+| Path | Role |
+| --- | --- |
+| `backend/cmd/api/main.go` | Composition root: wire dependencies and start the server |
+| `backend/internal/config` | Load and validate environment variables |
+| `backend/internal/models` | Define data structures and BSON/JSON tags |
+| `backend/internal/repository` | Keep MongoDB queries out of HTTP handlers |
+| `backend/internal/httpapi` | Routes, middleware, validation, and handlers |
 
-## Interview concepts in this code
+## 1. Structs and tags
 
-### Structs, pointers, and interfaces
+**Definition:** A struct groups related fields into one typed value.
 
-A struct groups data, such as `models.Order`. A pointer (`*primitive.ObjectID`)
-in `ListOrders` represents an optional filter: nil means all orders, while a
-pointer means one user's orders. `http.Handler` is an interface; chi and the
-standard library can compose middleware because they implement it.
+**Keywords:** fields, type safety, struct tags, JSON, BSON
 
-**Keywords:** fields, tags, methods, pointers, interfaces.
+QuikBite uses model structs for users, foods, and orders. Tags such as
+`bson:"food_id"` tell MongoDB which field name to use, while `json:"token"`
+controls the API response shape.
 
-### Explicit error handling
+**Interview answer:** “I use structs to model domain data and tags to keep the
+Go field names compatible with MongoDB and the frontend JSON contract.”
 
-Go returns errors as values. Database calls are checked immediately and mapped
-to a deliberate HTTP response. This avoids silently returning a successful
-response when MongoDB or validation failed.
+## 2. Pointers
 
-**Keywords:** `error`, early return, wrapping, status mapping.
+**Definition:** A pointer stores the address of a value and can also be `nil`.
 
-### Context
+**Keywords:** optional value, `nil`, address, mutation
 
-Every MongoDB call receives `r.Context()`. Request cancellation and server
-shutdown can therefore stop work that no longer has a client waiting.
+An optional order filter can use a pointer. `nil` means “no filter”; a value
+means “filter by this user.”
 
-**Keywords:** cancellation, deadlines, request scope, cleanup.
+**Interview answer:** “I use pointers when nil has meaning, such as an optional
+filter or an optional configuration value.”
 
-### HTTP handlers and middleware
+## 3. Interfaces
 
-Handlers implement the API contract. `auth` validates the Bearer JWT and stores
-claims in the request context; `admin` checks the role before mutation routes.
-This keeps authorization consistent across foods, orders, and admin endpoints.
+**Definition:** An interface describes behavior instead of a concrete type.
 
-**Keywords:** `http.Handler`, middleware chain, context, authorization.
+**Keywords:** behavior, abstraction, substitution, testing
 
-### Dependency injection
+The repository interface describes operations such as listing foods. The HTTP
+server can use a real MongoDB repository in production or a fake repository in
+tests.
 
-`httpapi.New` receives a repository, configuration, and logger instead of
-creating global connections. Tests can therefore construct the server with a
-controlled configuration and exercise routing without a live MongoDB instance.
+**Interview answer:** “Interfaces reduce coupling. The handler depends on the
+operations it needs, not on MongoDB implementation details.”
 
-**Keywords:** constructor, explicit dependencies, testability, composition root.
+## 4. Explicit error handling
 
-### MongoDB operations
+**Definition:** Go returns errors as values, so the caller decides what to do.
 
-The official driver uses BSON filters such as `bson.M{"_id": id}` and typed
-decoding into model structs. Existing ObjectIDs and collection names are
-preserved, so the Go service reads and writes QuikBite Atlas data directly.
+**Keywords:** `error`, early return, wrapping, status code
 
-### JWT and bcrypt
+The API checks errors immediately. Validation errors become client errors,
+authentication errors become `401` or `403`, and database failures become
+server errors. The API does not silently return success after a failure.
 
-Passwords are checked with bcrypt cost 12. JWT claims retain `id`, `name`,
-`email`, and `isAdmin`, with a seven-day expiry. Password hashes are excluded
-from JSON using `json:"-"` and admin list projections.
+**Interview answer:** “Go makes failure handling explicit. I check errors near
+the operation that produced them and map them to a clear HTTP response.”
 
-### Concurrency and race-condition prevention
+## 5. Context
 
-The HTTP server handles requests concurrently by default. Handlers avoid shared
-mutable state; cart and order state lives in MongoDB. The current numeric
-order-number rule is retained for application consistency, but high-volume production
-deployments should replace it with an atomic counter or transaction.
+**Definition:** Context carries cancellation, deadlines, and request-scoped
+values.
 
-## Useful commands
+**Keywords:** cancellation, deadline, request scope, cleanup
+
+MongoDB calls receive `r.Context()`. If a browser disconnects or the server is
+shutting down, the database operation can stop instead of running forever.
+
+**Interview answer:** “Request context connects the lifetime of database work to
+the HTTP request and supports cancellation and deadlines.”
+
+## 6. HTTP handlers
+
+**Definition:** A handler receives an HTTP request and produces an HTTP
+response.
+
+**Keywords:** method, path, status, headers, JSON
+
+A QuikBite handler decodes input, validates it, calls a repository method, and
+encodes a JSON response. Keeping those steps visible makes the API behavior
+easy to trace.
+
+## 7. Middleware
+
+**Definition:** Middleware wraps a handler to run shared logic before or after
+the handler.
+
+**Keywords:** chain, cross-cutting concern, authentication, authorization
+
+QuikBite uses middleware for CORS, JWT authentication, and admin checks.
+Authentication identifies the user; authorization decides whether that user
+may perform an admin action.
+
+**Interview answer:** “Middleware prevents duplicated security logic and makes
+protected routes consistent.”
+
+## 8. Dependency injection
+
+**Definition:** Dependency injection passes dependencies into a component
+instead of creating them inside it.
+
+**Keywords:** constructor, loose coupling, testability, composition root
+
+`httpapi.New` receives the repository, configuration, and logger. The entry
+point creates the real dependencies, while tests can provide controlled ones.
+
+**Interview answer:** “Dependency injection makes dependencies explicit and
+allows tests to replace external services.”
+
+## 9. Repository pattern
+
+**Definition:** A repository hides persistence operations behind an
+application-focused interface.
+
+**Keywords:** data access, abstraction, separation, mocking
+
+Handlers ask the repository to list foods or create an order. They do not know
+which MongoDB filter or collection is used.
+
+**Interview answer:** “The repository pattern separates business/API logic from
+database queries and improves maintainability.”
+
+## 10. JWT and bcrypt
+
+**JWT definition:** A signed token carrying claims about the authenticated user.
+
+**Bcrypt definition:** A deliberately slow one-way password hashing algorithm.
+
+**Keywords:** claims, signature, expiry, salt, one-way hash
+
+Passwords are never stored as plain text. Login compares the submitted password
+with the bcrypt hash. A successful login receives a seven-day JWT containing
+identity and role claims.
+
+**Interview answer:** “Bcrypt protects stored passwords, while JWT carries
+short-lived signed identity claims between the frontend and API.”
+
+## 11. Concurrency
+
+**Definition:** A Go HTTP server handles multiple requests concurrently.
+
+**Keywords:** goroutine, shared state, race, atomicity
+
+Handlers avoid shared mutable state and store application data in MongoDB. The
+current order-number logic preserves the old behavior, but a high-volume
+system should use an atomic counter or transaction to avoid duplicate numbers.
+
+## 12. Graceful shutdown
+
+**Definition:** Stop accepting new work, finish active work, then release
+resources.
+
+**Keywords:** signal, timeout, cleanup, `Shutdown`
+
+The entry point listens for termination signals, shuts down the HTTP server with
+a timeout, and disconnects from MongoDB.
+
+## 13. Useful commands
 
 ```powershell
 cd backend
+gofmt -w .
 go test ./...
-go run ./cmd/api
+go vet ./...
 go build ./cmd/api
+go run ./cmd/api
 ```
+
+## Short project explanation for interviews
+
+> “QuikBite is a React and Go food-delivery application. The Go API uses Chi
+> routing, JWT middleware, bcrypt, and a repository layer around MongoDB Atlas.
+> Customers and admins are separate React applications. Admin routes require a
+> valid JWT with an admin claim. Cloudinary stores production images because
+> Render's local filesystem is not persistent. I kept the layers separate so
+> the handlers are testable and the MongoDB implementation can change without
+> rewriting the API.”

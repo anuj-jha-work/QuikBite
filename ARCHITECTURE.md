@@ -1,64 +1,157 @@
 # QuikBite Architecture and API Reference
 
-## Architecture
+## 1. Request flow
 
-The backend is the Go service started by
-`backend/cmd/api/main.go`. It uses Chi, the official MongoDB Go driver, JWT,
-bcrypt, standard-library multipart uploads, structured logging, and graceful
-shutdown. The React customer and admin applications consume this HTTP API.
+```text
+Browser
+  │
+  │  HTTP request
+  │  Authorization: Bearer <JWT>
+  ▼
+Chi router
+  │
+  ├── CORS middleware
+  ├── authentication middleware
+  ├── admin middleware
+  └── handler
+          │
+          ├── repository
+          │       └── MongoDB Atlas
+          └── Cloudinary upload
+```
 
-## Complete API inventory
+The frontend never connects directly to MongoDB. It calls the Go API. The API
+is responsible for validation, authentication, authorization, database access,
+and response formatting.
 
-| Method | Path | Auth | Purpose |
-| --- | --- | --- | --- |
-| GET | `/` | Public | API status |
-| GET | `/healthz` | Public | Health check |
-| GET | `/api/food/list` | Public | List foods |
-| POST | `/api/food/add` | Admin | Create food with `image` upload |
-| PUT | `/api/food/update/:id` | Admin | Update food |
-| DELETE | `/api/food/remove/:id` | Admin | Delete food |
-| POST | `/api/user/register` | Public | Register and return JWT |
-| POST | `/api/user/login` | Public | Login and return JWT |
-| GET | `/api/user/me` | User | Current user |
-| GET | `/api/cart/get` | User | Read cart |
-| POST | `/api/cart/add` | User | Add cart quantity |
-| POST | `/api/cart/remove` | User | Remove cart quantity |
-| POST | `/api/cart/update` | User | Set cart quantity |
-| POST | `/api/order/place` | User | Place order |
-| GET | `/api/order/userorders` | User | User order history |
-| GET | `/api/order/list` | Admin | All orders |
-| POST | `/api/order/status` | Admin | Update order status |
-| GET | `/api/admin/dashboard` | Admin | Dashboard statistics |
-| GET | `/api/admin/users` | Admin | Sanitized user list |
-| GET | `/images/*` | Public | Serve uploaded images |
+## 2. Backend layers
 
-Unknown routes return `{ "success": false, "message": "..." }`.
+| Layer | Location | Responsibility |
+| --- | --- | --- |
+| Entry point | `backend/cmd/api/main.go` | Load config, connect MongoDB, start and stop the server |
+| Configuration | `backend/internal/config` | Read environment variables and reject unsafe production values |
+| Models | `backend/internal/models` | Define Go structs and preserve BSON/JSON field names |
+| Repository | `backend/internal/repository` | Execute MongoDB queries |
+| HTTP API | `backend/internal/httpapi` | Routes, middleware, validation, handlers, and responses |
 
-## MongoDB compatibility
+This separation follows a simple rule: handlers understand HTTP, repositories
+understand MongoDB, and models describe data.
 
-The service uses the `quikbite` database and `users`, `foods`, and
-`orders` collections. Existing BSON names, ObjectIDs, timestamps, cart maps,
-embedded order addresses/payments, and bcrypt password hashes are preserved.
-The application never drops or recreates collections.
+## 3. API endpoints
 
-## Authentication and uploads
+### Public endpoints
 
-JWTs contain `id`, `name`, `email`, and `isAdmin` claims with seven-day expiry.
-Passwords use bcrypt cost 12. Admin routes require both a valid Bearer token and
-the admin claim. Password hashes and secrets are never returned or logged.
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/` | API status |
+| GET | `/healthz` | Render health check |
+| GET | `/api/food/list` | List all foods |
+| POST | `/api/user/register` | Register a customer and return a JWT |
+| POST | `/api/user/login` | Login and return a JWT |
 
-Uploads accept one `image` multipart field, JPEG/JPG/PNG/WEBP content, and files
-up to 5 MiB. Local development stores files in `backend/uploads`; production
-uses Cloudinary and stores the returned HTTPS URL in MongoDB.
+### Authenticated customer endpoints
 
-## Configuration
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/user/me` | Read the current user |
+| GET | `/api/cart/get` | Read the user's cart |
+| POST | `/api/cart/add` | Add food to the cart |
+| POST | `/api/cart/remove` | Remove food from the cart |
+| POST | `/api/cart/update` | Set a cart quantity |
+| POST | `/api/order/place` | Place an order |
+| GET | `/api/order/userorders` | Read the user's order history |
 
-Copy `backend/.env.example` to `backend/.env` and provide `MONGO_URL`,
-`JWT_SECRET`, admin settings, CORS origins, and image storage settings. The
-service requires an explicit MongoDB URL.
+### Admin endpoints
 
-## Operational notes
+| Method | Path | Purpose |
+| --- | --- | --- |
+| POST | `/api/food/add` | Create food, optionally with an `image` file |
+| PUT | `/api/food/update/:id` | Update food |
+| DELETE | `/api/food/remove/:id` | Delete food |
+| GET | `/api/order/list` | List all orders |
+| POST | `/api/order/status` | Update order status |
+| GET | `/api/admin/dashboard` | Read dashboard statistics |
+| GET | `/api/admin/users` | Read a sanitized user list |
 
-1. Local uploads are for development only; production uses Cloudinary.
-2. Order numbers use the current numeric compatibility behavior; high-volume
-   deployments should replace “last order plus one” with an atomic counter.
+### Static image endpoint
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/images/*` | Serve local development images |
+
+Unknown routes return a JSON error with `success: false`.
+
+## 4. Authentication and authorization
+
+1. A user registers or logs in.
+2. The API verifies the password with bcrypt.
+3. The API signs a JWT containing `id`, `name`, `email`, and `isAdmin`.
+4. The frontend stores the token and sends it as:
+
+   ```text
+   Authorization: Bearer <token>
+   ```
+
+5. Authentication middleware validates the token and puts the claims in the
+   request context.
+6. Admin middleware checks the `isAdmin` claim before admin handlers run.
+
+Tokens expire after seven days. Public registration always creates a normal
+customer; it does not grant admin access.
+
+## 5. MongoDB data compatibility
+
+The service uses the existing `quikbite` database and these collections:
+
+- `users`
+- `foods`
+- `orders`
+
+The Go models preserve existing BSON names, ObjectIDs, timestamps, cart maps,
+embedded addresses, payment data, and bcrypt hashes. The application does not
+drop or recreate collections, so it can use the existing Atlas data.
+
+## 6. Upload behavior
+
+- Accepted field: `image`
+- Accepted types: JPEG, JPG, PNG, and WEBP
+- Maximum size: 5 MiB
+- Development: stores files under `backend/uploads`
+- Production: uploads to Cloudinary and stores the HTTPS URL in MongoDB
+
+Cloudinary is required in production because Render's local filesystem is
+ephemeral.
+
+## 7. Configuration
+
+The backend reads configuration from environment variables. Important values:
+
+| Variable | Meaning |
+| --- | --- |
+| `PORT` | HTTP port supplied by Render or set locally |
+| `MONGO_URL` | MongoDB Atlas connection string |
+| `MONGO_DATABASE` | Database name |
+| `JWT_SECRET` | Secret used to sign tokens |
+| `CORS_ORIGINS` | Comma-separated frontend origins |
+| `IMAGE_STORAGE` | `local` for development or `cloudinary` in production |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
+| `CLOUDINARY_UPLOAD_PRESET` | Unsigned Cloudinary preset |
+| `MAX_BODY_SIZE` | Maximum request body size |
+
+Production validation rejects weak JWT secrets, insecure CORS origins, and
+local image storage.
+
+## 8. Important design trade-off
+
+Order numbers currently follow the existing compatibility behavior based on the
+previous number. This preserves current application behavior, but a high-volume
+system should use an atomic counter or database transaction to prevent two
+concurrent requests from receiving the same number.
+
+## Interview summary
+
+> QuikBite uses a layered Go REST API. Chi routes requests through CORS and JWT
+> middleware, handlers validate input and call a MongoDB repository, and the
+> frontend receives JSON responses. MongoDB stores application data, while
+> Cloudinary stores production images because Render's filesystem is
+> ephemeral.
