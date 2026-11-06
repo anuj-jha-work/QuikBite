@@ -12,9 +12,8 @@ QuikBite/
 └── backend/    # Go REST API and MongoDB integration
 ```
 
-The backend is exclusively Go. It preserves the existing `/api/...` endpoints,
-Bearer JWT authentication, MongoDB collections, response fields, and image
-upload behavior. No Docker or Node.js backend runtime is required.
+The backend is built with Go and provides the `/api/...` REST API, Bearer JWT
+authentication, MongoDB persistence, and Cloudinary image uploads.
 
 ## Configuration
 
@@ -68,12 +67,12 @@ npm run dev
 
 The API supports registration/login/profile, food CRUD, carts, checkout,
 orders, admin dashboard statistics, users, and image uploads. See
-[`MIGRATION_PLAN.md`](./MIGRATION_PLAN.md) for the endpoint inventory.
+[`ARCHITECTURE.md`](./ARCHITECTURE.md) for the endpoint inventory.
 
 ## Documentation
 
-- [`MIGRATION_PLAN.md`](./MIGRATION_PLAN.md) — Go architecture and API contract
-- [`MIGRATION_TEST_REPORT.md`](./MIGRATION_TEST_REPORT.md) — executed checks
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md) — architecture and API contract
+- [`TEST_REPORT.md`](./TEST_REPORT.md) — executed checks
 - [`GO_LEARNING_GUIDE.md`](./GO_LEARNING_GUIDE.md) — explanation of the Go code
 - [`DEPLOYMENT.md`](./DEPLOYMENT.md) — Render and Vercel deployment steps
 

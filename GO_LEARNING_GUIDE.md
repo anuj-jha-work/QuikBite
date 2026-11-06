@@ -1,7 +1,7 @@
 # Go Learning Guide for QuikBite
 
-This guide follows the implementation in `backend/`, rather than presenting
-unrelated Go examples.
+This guide explains the implementation in `backend/` using the actual QuikBite
+code.
 
 ## Project map
 
@@ -61,7 +61,7 @@ controlled configuration and exercise routing without a live MongoDB instance.
 
 The official driver uses BSON filters such as `bson.M{"_id": id}` and typed
 decoding into model structs. Existing ObjectIDs and collection names are
-preserved, so the Go service reads the same Atlas data as the previous backend.
+preserved, so the Go service reads and writes QuikBite Atlas data directly.
 
 ### JWT and bcrypt
 
@@ -72,8 +72,8 @@ from JSON using `json:"-"` and admin list projections.
 ### Concurrency and race-condition prevention
 
 The HTTP server handles requests concurrently by default. Handlers avoid shared
-mutable state; cart and order state lives in MongoDB. The legacy “last order plus
-one” order-number rule is retained for compatibility, but high-volume production
+mutable state; cart and order state lives in MongoDB. The current numeric
+order-number rule is retained for application consistency, but high-volume production
 deployments should replace it with an atomic counter or transaction.
 
 ## Useful commands

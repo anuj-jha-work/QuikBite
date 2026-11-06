@@ -1,11 +1,10 @@
-# QuikBite Go Backend Test Report
+# QuikBite Test Report
 
 ## Scope
 
-The Go implementation covers every endpoint inventoried in
-[MIGRATION_PLAN.md](./MIGRATION_PLAN.md). Customer and admin frontend source
-remains unchanged because route paths, methods, token authentication,
-multipart fields, and response keys are preserved.
+The report covers the Go API and both React/Vite production builds. Customer and
+admin applications use the documented API routes, token authentication,
+multipart fields, and response keys.
 
 ## Executed checks
 
