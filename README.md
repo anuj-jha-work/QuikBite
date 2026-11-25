@@ -117,9 +117,9 @@ data-flow explanation.
 
 ## Production deployment
 
-- Customer frontend: Vercel, root directory `frontend`
+- Customer frontend: [quik-bite-91xgc20js-roger2005.vercel.app](https://quik-bite-91xgc20js-roger2005.vercel.app) (Vercel, root directory `frontend`)
 - Admin frontend: Vercel, root directory `admin`
-- Go API: Render native Go service, root directory `backend`
+- Go API: [quikbite-go-api.onrender.com](https://quikbite-go-api.onrender.com) (Render native Go service, root directory `backend`)
 - Database: MongoDB Atlas
 - Images: Cloudinary
 

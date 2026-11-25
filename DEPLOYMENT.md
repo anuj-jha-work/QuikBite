@@ -5,23 +5,29 @@ required.
 
 ## Deployment architecture
 
-| Part | Platform | Directory |
-| --- | --- | --- |
-| Customer app | Vercel | `frontend` |
-| Admin app | Vercel | `admin` |
-| Go API | Render Web Service | `backend` |
-| Database | MongoDB Atlas | Existing `quikbite` database |
-| Images | Cloudinary | External image storage |
+| Part | Platform | Directory | Live deployment |
+| --- | --- | --- | --- |
+| Customer app | Vercel | `frontend` | [quik-bite-91xgc20js-roger2005.vercel.app](https://quik-bite-91xgc20js-roger2005.vercel.app) |
+| Admin app | Vercel | `admin` | Add the admin Vercel URL when available |
+| Go API | Render Web Service | `backend` | [quikbite-go-api.onrender.com](https://quikbite-go-api.onrender.com) |
+| Database | MongoDB Atlas | Existing `quikbite` database | |
+| Images | Cloudinary | External image storage | |
 
 ## 1. Deploy the Go API to Render
 
-Create a new Render **Web Service** from the GitHub repository:
+Create a Render **Web Service** from the GitHub repository:
 
 ```text
 Root Directory: backend
 Build Command: go build -o quikbite-api ./cmd/api
 Start Command: ./quikbite-api
 Health Check Path: /healthz
+```
+
+The deployed API is available at:
+
+```text
+https://quikbite-go-api.onrender.com
 ```
 
 Add these environment variables in Render:
@@ -61,10 +67,14 @@ Root Directory: frontend
 Framework: Vite
 Build Command: npm run build
 Environment variable:
-VITE_API_URL=https://<your-render-service>.onrender.com
+VITE_API_URL=https://quikbite-go-api.onrender.com
 ```
 
-Deploy and copy the generated customer URL.
+The customer frontend deployment is:
+
+```text
+https://quik-bite-91xgc20js-roger2005.vercel.app
+```
 
 ## 4. Deploy the admin frontend
 
@@ -75,27 +85,27 @@ Root Directory: admin
 Framework: Vite
 Build Command: npm run build
 Environment variable:
-VITE_API_URL=https://<your-render-service>.onrender.com
+VITE_API_URL=https://quikbite-go-api.onrender.com
 ```
 
-Deploy and copy the generated admin URL.
+Copy the generated admin URL for the CORS configuration below.
 
 ## 5. Finish CORS configuration
 
-Return to Render and add:
+Return to Render and set `CORS_ORIGINS` to the exact customer and admin frontend
+origins (no trailing slash):
 
 ```text
-CORS_ORIGINS=https://customer-url.vercel.app,https://admin-url.vercel.app
+CORS_ORIGINS=https://quik-bite-91xgc20js-roger2005.vercel.app,https://<admin-vercel-url>
 ```
 
-Use exact HTTPS origins with no trailing slash. Save the change and redeploy
-the Render service.
+Save the change and redeploy the Render service.
 
 ## 6. Production smoke test
 
 Test in this order:
 
-1. `https://<render-service>.onrender.com/healthz`
+1. `https://quikbite-go-api.onrender.com/healthz`
 2. Customer food list
 3. Customer registration and login
 4. Cart and checkout
